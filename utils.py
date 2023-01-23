@@ -449,7 +449,7 @@ class CCS(object):
         
     def initialize_probe(self):
         if self.linear:
-            self.probe = nn.Linear(self.d, 1)
+            self.probe = nn.Sequential(nn.Linear(self.d, 1), nn.Sigmoid())
         else:
             self.probe = MLPProbe(self.d)
         self.probe.to(self.device)    
