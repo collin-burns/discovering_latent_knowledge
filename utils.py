@@ -521,16 +521,16 @@ class CCS(object):
                 x0_batch = x0[j*batch_size:(j+1)*batch_size]
                 x1_batch = x1[j*batch_size:(j+1)*batch_size]
             
-            # probe
-            p0, p1 = self.probe(x0_batch), self.probe(x1_batch)
+                # probe
+                p0, p1 = self.probe(x0_batch), self.probe(x1_batch)
 
-            # get the corresponding loss
-            loss = self.get_loss(p0, p1)
+                # get the corresponding loss
+                loss = self.get_loss(p0, p1)
 
-            # update the parameters
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+                # update the parameters
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
         return loss.detach().cpu().item()
     
