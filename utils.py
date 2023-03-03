@@ -30,6 +30,8 @@ model_mapping = {
     "deberta-mnli": "microsoft/deberta-xxlarge-v2-mnli",
     "deberta": "microsoft/deberta-xxlarge-v2",
     "roberta-mnli": "roberta-large-mnli",
+    "distilbert": "hf-maintainers/distilbert-base-uncased",
+    "gpt-2": "hf-maintainers/gpt2"
 }
 
 
