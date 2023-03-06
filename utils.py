@@ -18,6 +18,10 @@ from promptsource.templates import DatasetTemplates
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForMaskedLM, AutoModelForCausalLM
 from datasets import load_dataset
 
+# For COSMIC_QA, best is prompt idx 3
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device.type)
 
 ############# Model loading and result saving #############
 
@@ -30,8 +34,8 @@ model_mapping = {
     "deberta-mnli": "microsoft/deberta-xxlarge-v2-mnli",
     "deberta": "microsoft/deberta-xxlarge-v2",
     "roberta-mnli": "roberta-large-mnli",
-    "distilbert": "hf-maintainers/distilbert-base-uncased",
-    "gpt-2": "hf-maintainers/gpt2"
+    "distilbert": "distilbert-base-uncased",
+    "gpt-2": "gpt2"
 }
 
 
@@ -47,8 +51,8 @@ def get_parser():
     parser.add_argument("--parallelize", action="store_true", help="Whether to parallelize the model")
     parser.add_argument("--device", type=str, default="cuda", help="Device to use for the model")
     # setting up data
-    parser.add_argument("--dataset_name", type=str, default="imdb", help="Name of the dataset to use")
-    parser.add_argument("--split", type=str, default="test", help="Which split of the dataset to use")
+    parser.add_argument("--dataset_name", type=str, default="cosmos_qa", help="Name of the dataset to use")
+    parser.add_argument("--split", type=str, default="train", help="Which split of the dataset to use")
     parser.add_argument("--prompt_idx", type=int, default=0, help="Which prompt to use")
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use")
     parser.add_argument("--num_examples", type=int, default=1000, help="Number of examples to generate")
@@ -133,11 +137,13 @@ def load_single_generation(args, generation_type="hidden_states"):
 
 def load_all_generations(args):
     # load all the saved generations: neg_hs, pos_hs, and labels
-    neg_hs = load_single_generation(args, generation_type="negative_hidden_states")
-    pos_hs = load_single_generation(args, generation_type="positive_hidden_states")
+    c0_hs = load_single_generation(args, generation_type="c0_hidden_states")
+    c1_hs = load_single_generation(args, generation_type="c1_hidden_states")
+    c2_hs = load_single_generation(args, generation_type="c2_hidden_states")
+    c3_hs = load_single_generation(args, generation_type="c3_hidden_states")
     labels = load_single_generation(args, generation_type="labels")
 
-    return neg_hs, pos_hs, labels
+    return c0_hs, c1_hs, c2_hs, c3_hs, labels
 
 
 ############# Data #############
@@ -166,7 +172,7 @@ class ContrastDataset(Dataset):
 
         # prompt
         prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
-        self.prompt = all_prompts[prompt_name_list[prompt_idx]]
+        self.prompt = all_prompts[prompt_name_list[prompt_idx]] # TODO: can experiment with changing the prompts used in the dataset
 
     def __len__(self):
         return len(self.raw_dataset)
@@ -247,32 +253,42 @@ class ContrastDataset(Dataset):
     def __getitem__(self, index):
         # get the original example
         data = self.raw_dataset[int(index)]
-        text, true_answer = data["text"], data["label"]
+        # TODO: change for a different dataset (validate)
+        text, true_answer = data["question"], data["label"]
+        # text, true_answer = data["text"], data["label"]
 
         # get the possible labels
         # (for simplicity assume the binary case for contrast pairs)
-        label_list = self.prompt.get_answer_choices_list(data)
-        assert len(label_list) == 2, print("Make sure there are only two possible answers! Actual number of answers:", label_list)
+        label_list = [x for x in [data['answer0'], data['answer1'], data['answer2'], data['answer3']] if x != '']
+        # label_list = self.prompt.get_answer_choices_list(data)
+        assert len(label_list) == 4, print("Make sure there are exacly four possible answers! Actual number of answers:", label_list)
+        # assert len(label_list) == 2, print("Make sure there are exacly four possible answers! Actual number of answers:", label_list)
 
         # reconvert to dataset format but with fake/candidate labels to create the contrast pair
-        neg_example = {"text": text, "label": 0}
-        pos_example = {"text": text, "label": 1}
+        c0_example = data.copy()
+        c0_example['label'] = 0
+        c1_example = data.copy()
+        c1_example['label'] = 1
+        c2_example = data.copy()
+        c2_example['label'] = 2
+        c3_example = data.copy()
+        c3_example['label'] = 3
 
         # construct contrast pairs by answering the prompt with the two different possible labels
         # (for example, label 0 might be mapped to "no" and label 1 might be mapped to "yes")
-        neg_prompt, pos_prompt = self.prompt.apply(neg_example), self.prompt.apply(pos_example)
+        c0_prompt, c1_prompt, c2_prompt, c3_prompt = self.prompt.apply(c0_example), self.prompt.apply(c1_example), self.prompt.apply(c2_example), self.prompt.apply(c3_example)
 
         # tokenize
-        neg_ids, pos_ids = self.encode(neg_prompt), self.encode(pos_prompt)
+        c0_ids, c1_ids, c2_ids, c3_ids = self.encode(c0_prompt), self.encode(c1_prompt), self.encode(c2_prompt), self.encode(c3_prompt),
 
         # verify these are different (e.g. tokenization didn't cut off the difference between them)
         if self.use_decoder and self.model_type == "encoder_decoder":
-            assert (neg_ids["decoder_input_ids"] - pos_ids["decoder_input_ids"]).sum() != 0, print("The decoder_input_ids for the contrast pairs are the same!", neg_ids, pos_ids)
+            assert (c0_ids["decoder_input_ids"] - c1_ids["decoder_input_ids"] - c2_ids["decoder_input_ids"] - c3_ids["decoder_input_ids"]).sum() != 0, print("The decoder_input_ids for the contrast pairs are the same!", c0_ids, c1_ids, c2_ids, c3_ids)
         else:
-            assert (neg_ids["input_ids"] - pos_ids["input_ids"]).sum() != 0, print("The input_ids for the contrast pairs are the same!", neg_ids, pos_ids)
+            assert (c0_ids["input_ids"] - c1_ids["input_ids"] - c2_ids["input_ids"] - c3_ids["input_ids"]).sum() != 0, print("The input_ids for the contrast pairs are the same!", c0_ids, c1_ids, c2_ids, c3_ids)
 
         # return the tokenized inputs, the text prompts, and the true label
-        return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
+        return c0_ids, c1_ids, c2_ids, c3_ids, c0_prompt, c1_prompt, c2_prompt, c3_prompt, true_answer
 
     
 def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
@@ -283,7 +299,10 @@ def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, nu
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name)[split]
+    if dataset_name == 'race':
+        raw_dataset = load_dataset(dataset_name, name='high')[split]    
+    else:
+        raw_dataset = load_dataset(dataset_name)[split]
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
@@ -344,7 +363,7 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
     """
     if use_decoder:
         assert "decoder" in model_type
-        
+
     # forward pass
     with torch.no_grad():
         batch_ids = batch_ids.to(model.device)
@@ -374,8 +393,8 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         # first we need to get the first mask location for each example in the batch
         assert token_idx < 0, print("token_idx must be either 0 or negative, but got", token_idx)
         mask = batch_ids["decoder_attention_mask"] if (model_type == "encoder_decoder" and use_decoder) else batch_ids["attention_mask"]
-        first_mask_loc = get_first_mask_loc(mask).squeeze()
-        final_hs = hs[torch.arange(hs.size(0)), first_mask_loc+token_idx]  # (bs, dim, num_layers)
+        first_mask_loc = get_first_mask_loc(mask).squeeze().cpu()
+        final_hs = hs[torch.arange(hs.size(0)).cpu(), (first_mask_loc+token_idx)]  # (bs, dim, num_layers)
     
     return final_hs
 
@@ -388,30 +407,39 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
     The dataloader should correspond to examples *with a candidate label already added* to each example.
     E.g. this function should be used for "Q: Is 2+2=5? A: True" or "Q: Is 2+2=5? A: False", but NOT for "Q: Is 2+2=5? A: ".
     """
-    all_pos_hs, all_neg_hs = [], []
+    all_c0_hs, all_c1_hs, all_c2_hs, all_c3_hs = [], [], [], []
     all_gt_labels = []
 
     model.eval()
     for batch in tqdm(dataloader):
-        neg_ids, pos_ids, _, _, gt_label = batch
+        c0_ids, c1_ids, c2_ids, c3_ids, c0_prompt, c1_prompt, c2_prompt, c3_prompt, gt_label = batch
 
-        neg_hs = get_individual_hidden_states(model, neg_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
+        c0_hs = get_individual_hidden_states(model, c0_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
-        pos_hs = get_individual_hidden_states(model, pos_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
+        c1_hs = get_individual_hidden_states(model, c1_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
+                                              model_type=model_type, use_decoder=use_decoder)
+        c2_hs = get_individual_hidden_states(model, c2_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
+                                              model_type=model_type, use_decoder=use_decoder)
+        c3_hs = get_individual_hidden_states(model, c3_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
 
         if dataloader.batch_size == 1:
-            neg_hs, pos_hs = neg_hs.unsqueeze(0), pos_hs.unsqueeze(0)
+            c0_hs, c1_hs, c2_hs, c3_hs = c0_hs.unsqueeze(0), c1_hs.unsqueeze(0), c2_hs.unsqueeze(0), c3_hs.unsqueeze(0)
 
-        all_neg_hs.append(neg_hs)
-        all_pos_hs.append(pos_hs)
+        all_c0_hs.append(c0_hs)
+        all_c1_hs.append(c1_hs)
+        all_c2_hs.append(c2_hs)
+        all_c3_hs.append(c3_hs)
+        
         all_gt_labels.append(gt_label)
     
-    all_neg_hs = np.concatenate(all_neg_hs, axis=0)
-    all_pos_hs = np.concatenate(all_pos_hs, axis=0)
+    all_c0_hs = np.concatenate(all_c0_hs, axis=0)
+    all_c1_hs = np.concatenate(all_c1_hs, axis=0)
+    all_c2_hs = np.concatenate(all_c2_hs, axis=0)
+    all_c3_hs = np.concatenate(all_c3_hs, axis=0)
     all_gt_labels = np.concatenate(all_gt_labels, axis=0)
 
-    return all_neg_hs, all_pos_hs, all_gt_labels
+    return all_c0_hs, all_c1_hs, all_c2_hs, all_c3_hs, all_gt_labels
 
 ############# CCS #############
 class MLPProbe(nn.Module):
@@ -426,12 +454,14 @@ class MLPProbe(nn.Module):
         return torch.sigmoid(o)
 
 class CCS(object):
-    def __init__(self, x0, x1, nepochs=1000, ntries=10, lr=1e-3, batch_size=-1, 
+    def __init__(self, x0, x1, x2, x3, nepochs=1000, ntries=10, lr=1e-3, batch_size=-1, 
                  verbose=False, device="cuda", linear=True, weight_decay=0.01, var_normalize=False):
         # data
         self.var_normalize = var_normalize
         self.x0 = self.normalize(x0)
         self.x1 = self.normalize(x1)
+        self.x2 = self.normalize(x2)
+        self.x3 = self.normalize(x3)
         self.d = self.x0.shape[-1]
 
         # training
@@ -475,7 +505,9 @@ class CCS(object):
         """
         x0 = torch.tensor(self.x0, dtype=torch.float, requires_grad=False, device=self.device)
         x1 = torch.tensor(self.x1, dtype=torch.float, requires_grad=False, device=self.device)
-        return x0, x1
+        x2 = torch.tensor(self.x2, dtype=torch.float, requires_grad=False, device=self.device)
+        x3 = torch.tensor(self.x3, dtype=torch.float, requires_grad=False, device=self.device)
+        return x0, x1, x2, x3
     
 
     def get_loss(self, p0, p1):

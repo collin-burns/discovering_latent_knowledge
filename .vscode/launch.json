@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--prompt_idx", "3", "--num_examples", "1", "--device", "cpu", "--model_name", "distilbert",  "--num_examples", "50", "--batch_size", "40", "--dataset_name", "cosmos_qa"]
+        }
+    ]
+}

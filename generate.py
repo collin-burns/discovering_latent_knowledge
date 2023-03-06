@@ -11,13 +11,15 @@ def main(args):
 
     # Get the hidden states and labels
     print("Generating hidden states")
-    neg_hs, pos_hs, y = get_all_hidden_states(model, dataloader, layer=args.layer, all_layers=args.all_layers, 
+    c0_hs, c1_hs, c2_hs, c3_hs, y = get_all_hidden_states(model, dataloader, layer=args.layer, all_layers=args.all_layers, 
                                               token_idx=args.token_idx, model_type=model_type, use_decoder=args.use_decoder)
 
     # Save the hidden states and labels
     print("Saving hidden states")
-    save_generations(neg_hs, args, generation_type="negative_hidden_states")
-    save_generations(pos_hs, args, generation_type="positive_hidden_states")
+    save_generations(c0_hs, args, generation_type="c0_hidden_states")
+    save_generations(c1_hs, args, generation_type="c1_hidden_states")
+    save_generations(c2_hs, args, generation_type="c2_hidden_states")
+    save_generations(c3_hs, args, generation_type="c3_hidden_states")
     save_generations(y, args, generation_type="labels")
 
 
