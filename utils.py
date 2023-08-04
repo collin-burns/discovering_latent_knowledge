@@ -345,7 +345,8 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         
     # forward pass
     with torch.no_grad():
-        batch_ids = batch_ids.to(model.device)
+        for k in batch_ids:
+            batch_ids[k] = batch_ids[k].to(model.device)
         output = model(**batch_ids, output_hidden_states=True)
 
     # get all the corresponding hidden states (which is a tuple of length num_layers)
