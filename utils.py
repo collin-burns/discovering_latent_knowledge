@@ -278,8 +278,8 @@ def toxic_preprocess(item):
     item["label"] = item["toxic"]
     return item
 
-def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
 
+def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
                    model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
@@ -287,7 +287,7 @@ def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, nu
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name, data_dir="jigsaw")[split]
+    raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
     preprocessed_dataset = raw_dataset.map(toxic_preprocess)
 
     # load all the prompts for that dataset
