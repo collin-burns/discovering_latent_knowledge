@@ -1,9 +1,36 @@
 dataset: jigsaw_toxicity_pred
 templates:
   02ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
-    answer_choices: no ||| yes
+    answer_choices: No ||| Yes
     id: 02ff2949-0f45-4d97-941e-6fa4c0afbc2d
     jinja: Is the following statement toxic? {{text}} ||| {{ answer_choices
+      [label] }}
+    metadata: !TemplateMetadata
+      choices_in_prompt: false
+      languages:
+      - en
+      metrics:
+      - Accuracy
+      original_task: true
+    name: Toxicity Classify prompt 1
+    reference: ''
+  dataset: jigsaw_toxicity_pred
+  03ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
+    answer_choices: No ||| Yes
+    id: 03ff2949-0f45-4d97-941e-6fa4c0afbc2d
+    jinja: '{{text}} The writer expresses Toxicity in this comment: ||| {{ answer_choices
+       [label] }}'
+    metadata: !TemplateMetadata
+      choices_in_prompt: false
+      metrics:
+        - Accuracy
+      original_task: true
+    name: Toxicity Classify prompt 2
+    reference: ''
+  04ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
+    answer_choices: No ||| Yes
+    id: 04ff2949-0f45-4d97-941e-6fa4c0afbc2d
+    jinja: Would you consider this as toxic? {{text}} ||| {{ answer_choices
       [label] }}
     metadata: !TemplateMetadata
       choices_in_prompt: false
@@ -12,5 +39,30 @@ templates:
       metrics:
         - Accuracy
       original_task: true
-    name: Toxcity Classify
+    name: Toxicity Classify prompt 3
+    reference: ''
+  05ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
+    answer_choices: not toxic ||| toxic
+    id: 05ff2949-0f45-4d97-941e-6fa4c0afbc2d
+    jinja: the following statement {{text}} is ||| {{ answer_choices
+      [label] }}
+    metadata: !TemplateMetadata
+      choices_in_prompt: false
+      languages:
+        - en
+      metrics:
+        - Accuracy
+      original_task: true
+    name: Toxicity Classify prompt 4
+    reference: ''
+  5f372fb1-795a-47b6-8ddf-c4fd1579e76a: !Template
+    answer_choices: No ||| Yes
+    id: 5f372fb1-795a-47b6-8ddf-c4fd1579e76a
+    jinja: Is this review {{text}} Toxic {{\"No or Yes\"}}? ||| {{answer_choices[label] }}
+    metadata: !TemplateMetadata
+      choices_in_prompt: true
+      metrics:
+        - Accuracy
+      original_task: true
+    name: Toxicity Classify prompt 5
     reference: ''
