@@ -46,6 +46,7 @@ def get_parser():
     parser.add_argument("--device", type=str, default="cuda", help="Device to use for the model")
     # setting up data
     parser.add_argument("--dataset_name", type=str, default="imdb", help="Name of the dataset to use")
+    parser.add_argument("--dataset_dir", type=str, default=None, help="Relative path to the dataset directory")
     parser.add_argument("--split", type=str, default="test", help="Which split of the dataset to use")
     parser.add_argument("--prompt_idx", type=int, default=0, help="Which prompt to use")
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use")
@@ -273,7 +274,7 @@ class ContrastDataset(Dataset):
         return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
 
     
-def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
+def get_dataloader(dataset_name, dataset_path, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
                    model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
@@ -281,7 +282,7 @@ def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, nu
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name)[split]
+    raw_dataset = load_dataset(dataset_name, data_dir=dataset_path)[split]
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
