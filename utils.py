@@ -273,8 +273,13 @@ class ContrastDataset(Dataset):
         # return the tokenized inputs, the text prompts, and the true label
         return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
 
-    
-def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
+def toxic_preprocess(item):
+    item["text"] = item["comment_text"]
+    item["label"] = item["toxic"]
+    return item
+
+def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
+
                    model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
@@ -282,13 +287,13 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
+    raw_dataset = load_dataset(dataset_name, data_dir="jigsaw")[split]
+    preprocessed_dataset = raw_dataset.map(toxic_preprocess)
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
-
     # create the ConstrastDataset
-    contrast_dataset = ContrastDataset(raw_dataset, tokenizer, all_prompts, prompt_idx, 
+    contrast_dataset = ContrastDataset(preprocessed_dataset, tokenizer, all_prompts, prompt_idx,
                                        model_type=model_type, use_decoder=use_decoder, 
                                        device=device)
 
@@ -300,7 +305,7 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     prompt = all_prompts[prompt_name_list[prompt_idx]]
     keep_idxs = []
     for idx in random_idxs:
-        question, answer = prompt.apply(raw_dataset[int(idx)])
+        question, answer = prompt.apply(preprocessed_dataset[int(idx)])
         input_text = question + " " + answer
         if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
             keep_idxs.append(idx)
