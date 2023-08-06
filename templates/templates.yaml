@@ -1,0 +1,16 @@
+dataset: jigsaw_toxicity_pred
+templates:
+  02ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
+    answer_choices: no ||| yes
+    id: 02ff2949-0f45-4d97-941e-6fa4c0afbc2d
+    jinja: Is the following statement toxic? {{text}} ||| {{ answer_choices
+      [label] }}
+    metadata: !TemplateMetadata
+      choices_in_prompt: false
+      languages:
+        - en
+      metrics:
+        - Accuracy
+      original_task: true
+    name: Toxcity Classify
+    reference: ''
