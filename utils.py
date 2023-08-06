@@ -46,6 +46,7 @@ def get_parser():
     parser.add_argument("--device", type=str, default="cuda", help="Device to use for the model")
     # setting up data
     parser.add_argument("--dataset_name", type=str, default="imdb", help="Name of the dataset to use")
+    parser.add_argument("--dataset_dir", type=str, default=None, help="Relative path to the dataset directory")
     parser.add_argument("--split", type=str, default="test", help="Which split of the dataset to use")
     parser.add_argument("--prompt_idx", type=int, default=0, help="Which prompt to use")
     parser.add_argument("--batch_size", type=int, default=1, help="Batch size to use")
@@ -278,6 +279,7 @@ def toxic_preprocess(item):
     return item
 
 def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
+
                    model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
@@ -287,6 +289,7 @@ def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, nu
     # load the raw dataset
     raw_dataset = load_dataset(dataset_name, data_dir="jigsaw")[split]
     preprocessed_dataset = raw_dataset.map(toxic_preprocess)
+
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
     # create the ConstrastDataset
@@ -348,7 +351,8 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         
     # forward pass
     with torch.no_grad():
-        batch_ids = batch_ids.to(model.device)
+        for k in batch_ids:
+            batch_ids[k] = batch_ids[k].to(model.device)
         output = model(**batch_ids, output_hidden_states=True)
 
     # get all the corresponding hidden states (which is a tuple of length num_layers)
