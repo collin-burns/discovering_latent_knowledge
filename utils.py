@@ -287,19 +287,12 @@ def get_dataloader(dataset_name, split, tokenizer, prompt_idx, batch_size=16, nu
     # load the raw dataset
     raw_dataset = load_dataset(dataset_name, data_dir="jigsaw")[split]
     preprocessed_dataset = raw_dataset.map(toxic_preprocess)
-   # print(type(preprocessed_dataset), preprocessed_dataset[0], len(preprocessed_dataset))
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
-  #  print(type(all_prompts), all_prompts.all_template_names)
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(preprocessed_dataset, tokenizer, all_prompts, prompt_idx,
                                        model_type=model_type, use_decoder=use_decoder, 
                                        device=device)
-    #print(contrast_dataset[0])
-    # i = 0
-    # while i< 100:
-    #     print(contrast_dataset[i])
-    #     i += 1
 
     # get a random permutation of the indices; we'll take the first num_examples of these that do not get truncated
     random_idxs = np.random.permutation(len(contrast_dataset))
