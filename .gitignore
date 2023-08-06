@@ -1,3 +1,5 @@
 venv/
 .idea/
-§
+__pycache__/
+generated_hidden_states/
+toxic_dataset_jigsaw/
