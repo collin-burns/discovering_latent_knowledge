@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     datasets = yaml_config['datasets']
     models = yaml_config['models']
-    num_examples_l = yaml_config['num_examples']
+    num_examples_l = yaml_config['num_training_examples']
 
     args_parser = get_parser()
     args = args_parser.parse_args()
