@@ -278,7 +278,7 @@ class ContrastDataset(Dataset):
 
 def toxic_function_preprocess(dataset_name, true_label, threshold):
 
-    if dataset_name == "jigsaw":
+    if dataset_name == "jigsaw_toxicity_pred":
         def toxic_preprocess(item):
             item["text"] = item["comment_text"]
             item["label"] = item[true_label]
