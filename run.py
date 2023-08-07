@@ -72,8 +72,6 @@ def get_prompt_indices(dataset):
 
 if __name__ == '__main__':
     yaml_config = parse_config()
-    template_file_path = yaml_config['template_file_path']
-    copy_templates_file(template_file_path)
 
     datasets = yaml_config['datasets']
     models = yaml_config['models']
@@ -83,6 +81,8 @@ if __name__ == '__main__':
     args = args_parser.parse_args()
     for model_name in models:
         for dataset_obj in datasets:
+            template_file_path = dataset_obj['template_file_path']
+            copy_templates_file(template_file_path)
             for n_examples in num_examples_l:
                 prompt_indices = get_prompt_indices(dataset_obj)
                 for i in prompt_indices:
