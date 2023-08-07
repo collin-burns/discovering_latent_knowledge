@@ -1,7 +1,20 @@
 from sklearn.linear_model import LogisticRegression
 from utils import get_parser, load_all_generations, CCS
 
-def main(args, generation_args):
+def main(parser):
+    generation_args = parser.parse_args()  # we'll use this to load the correct hidden states + labels
+    # We'll also add some additional args for evaluation
+    parser.add_argument("--nepochs", type=int, default=1000)
+    parser.add_argument("--ntries", type=int, default=10)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--ccs_batch_size", type=int, default=-1)
+    parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--ccs_device", type=str, default="cuda")
+    parser.add_argument("--linear", action="store_true")
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--var_normalize", action="store_true")
+    args = parser.parse_args()
+
     # load hidden states and labels
     neg_hs, pos_hs, y = load_all_generations(generation_args)
 
@@ -38,16 +51,4 @@ def main(args, generation_args):
 
 if __name__ == "__main__":
     parser = get_parser()
-    generation_args = parser.parse_args()  # we'll use this to load the correct hidden states + labels
-    # We'll also add some additional args for evaluation
-    parser.add_argument("--nepochs", type=int, default=1000)
-    parser.add_argument("--ntries", type=int, default=10)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--ccs_batch_size", type=int, default=-1)
-    parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--ccs_device", type=str, default="cuda")
-    parser.add_argument("--linear", action="store_true")
-    parser.add_argument("--weight_decay", type=float, default=0.01)
-    parser.add_argument("--var_normalize", action="store_true")
-    args = parser.parse_args()
-    main(args, generation_args)
+    main(parser)
