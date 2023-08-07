@@ -1,0 +1,21 @@
+template_file_path: templates/templates.yaml
+
+datasets:
+  - dataset_name: jigsaw_toxicity_pred
+    dataset_dir: toxic_dataset_jigsaw
+
+models:
+  - T5
+  - gpt-j
+  - T0pp
+  - unifiedqa
+  - deberta-mnli
+  - deberta
+  - roberta-mnli
+
+num_training_examples:
+  - 1000
+  - 2000
+  - 3000
+  - 4000
+  - 5000
