@@ -22,7 +22,7 @@ def parse_config():
     return config
 
 
-def generate_and_evaluate(run_args, model, dataset, num_examples):
+def generate_and_evaluate(run_args, model, dataset, num_examples, prompt_idx):
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
     dataset_name = dataset['dataset_name']
@@ -30,10 +30,11 @@ def generate_and_evaluate(run_args, model, dataset, num_examples):
     run_args.dataset_name = dataset_name
     run_args.dataset_dir = dataset_dir
     run_args.num_examples = num_examples
-    print(f"Running generate for model {model} with {num_examples} examples from "
-          f"dataset {dataset_name} in {dataset_dir}")
+    run_args.prompt_idx = prompt_idx
+    print(f"Running generate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
+          f"dataset {dataset_name} in directory {dataset_dir}")
     generate.main(run_args)
-    print(f"Running evaluate for model {model} with {num_examples} examples from "
+    print(f"Running evaluate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
           f"dataset {dataset_name} in {dataset_dir}")
     evaluate.main(get_parser())
 
@@ -48,6 +49,12 @@ def copy_templates_file(templates_file_path):
     print("Successfully copied templates file")
 
 
+def get_num_prompts(templates_file_path):
+    with open(templates_file_path, "r") as f:
+        templates = yaml.safe_load(f)
+    return len(templates['templates'])
+
+
 if __name__ == '__main__':
     yaml_config = parse_config()
     template_file_path = yaml_config['template_file_path']
@@ -56,10 +63,12 @@ if __name__ == '__main__':
     datasets = yaml_config['datasets']
     models = yaml_config['models']
     num_examples_l = yaml_config['num_training_examples']
+    num_prompts = get_num_prompts(template_file_path)
 
     args_parser = get_parser()
     args = args_parser.parse_args()
     for model_name in models:
         for dataset_obj in datasets:
             for n_examples in num_examples_l:
-                generate_and_evaluate(args, model_name, dataset_obj, n_examples)
+                for i in range(num_prompts):
+                    generate_and_evaluate(args, model_name, dataset_obj, n_examples, i)
