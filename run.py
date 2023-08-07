@@ -30,6 +30,7 @@ def generate_and_evaluate(run_args, model, dataset, num_examples, prompt_idx):
     run_args.dataset_dir = dataset_dir
     run_args.num_examples = num_examples
     run_args.prompt_idx = prompt_idx
+    print("-" * 200)
     print(f"Running generate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
           f"dataset {dataset_name} in directory {dataset_dir}")
     generate.main(run_args)
@@ -50,7 +51,7 @@ def copy_templates_file(templates_file_path):
 
 def get_num_prompts(templates_file_path, dataset_name):
     with open(templates_file_path, "r") as f:
-        templates = yaml.safe_load(f)
+        templates = yaml.full_load(f)
     # If we have templates for this dataset
     if templates['dataset'] == dataset_name:
         return len(templates['templates'])
