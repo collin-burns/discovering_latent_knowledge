@@ -1,5 +1,4 @@
 import os.path
-
 import yaml
 import argparse
 import site
@@ -66,7 +65,7 @@ def get_prompt_indices(dataset):
         return dataset_prompt_indices
     # Use all prompts in the templates file
     else:
-        num_prompts = get_num_prompts(template_file_path)
+        num_prompts = get_num_prompts(template_file_path, dataset['dataset_name'])
         return range(num_prompts)
 
 
