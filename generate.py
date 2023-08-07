@@ -1,11 +1,6 @@
 from utils import get_parser, load_model, get_dataloader, get_all_hidden_states, save_generations
 
-"""
-Running commands:
-    jigsaw: python generate.py --model_name roberta-mnli --num_examples 100 --batch_size 20 --dataset_name jigsaw_toxicity_pred
-    jigsaw_unintended_bias:  python generate.py --model_name roberta-mnli --num_examples 100 --batch_size 20 --dataset_name jigsaw_unintended_bias --device cpu --dataset_dir .\ --split train
 
-"""
 def main(args):
     # Set up the model and data
     print("Loading model")
