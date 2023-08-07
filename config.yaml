@@ -6,7 +6,6 @@ datasets:
     prompt_indices: []
 
 models:
-  - T5
   - gpt-j
   - T0pp
   - unifiedqa
