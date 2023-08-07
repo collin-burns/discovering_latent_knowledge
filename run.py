@@ -49,10 +49,25 @@ def copy_templates_file(templates_file_path):
     print("Successfully copied templates file")
 
 
-def get_num_prompts(templates_file_path):
+def get_num_prompts(templates_file_path, dataset_name):
     with open(templates_file_path, "r") as f:
         templates = yaml.safe_load(f)
-    return len(templates['templates'])
+    # If we have templates for this dataset
+    if templates['dataset'] == dataset_name:
+        return len(templates['templates'])
+    # No prompts found for this dataset
+    raise Exception(f"No prompts found for {dataset_name}.")
+
+
+def get_prompt_indices(dataset):
+    dataset_prompt_indices = dataset['prompt_indices']
+    # We have selected specific indices in the config file
+    if len(dataset_prompt_indices) > 0:
+        return dataset_prompt_indices
+    # Use all prompts in the templates file
+    else:
+        num_prompts = get_num_prompts(template_file_path)
+        return range(num_prompts)
 
 
 if __name__ == '__main__':
@@ -63,12 +78,12 @@ if __name__ == '__main__':
     datasets = yaml_config['datasets']
     models = yaml_config['models']
     num_examples_l = yaml_config['num_training_examples']
-    num_prompts = get_num_prompts(template_file_path)
 
     args_parser = get_parser()
     args = args_parser.parse_args()
     for model_name in models:
         for dataset_obj in datasets:
             for n_examples in num_examples_l:
-                for i in range(num_prompts):
+                prompt_indices = get_prompt_indices(dataset_obj)
+                for i in prompt_indices:
                     generate_and_evaluate(args, model_name, dataset_obj, n_examples, i)
