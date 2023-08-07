@@ -310,10 +310,11 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     """
     # load the raw dataset
     raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
-    preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label))
+    preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label, threshold))
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
+    print(all_prompts.name_to_id_mapping)
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(preprocessed_dataset, tokenizer, all_prompts, prompt_idx,
                                        model_type=model_type, use_decoder=use_decoder, 
