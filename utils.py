@@ -112,9 +112,7 @@ def save_generations(generation, args, generation_type):
     Saves the generations to an appropriate directory.
     """
     # construct the filename based on the args
-    arg_dict = vars(args)
-    exclude_keys = ["save_dir", "cache_dir", "device", "true_label", "threshold", "parallelize", "split"]
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
+    filename = get_generation_file_name(args, generation_type)
 
     # create save directory if it doesn't exist
     if not os.path.exists(args.save_dir):
@@ -124,11 +122,16 @@ def save_generations(generation, args, generation_type):
     np.save(os.path.join(args.save_dir, filename), generation)
 
 
+def get_generation_file_name(args, generation_type):
+    arg_dict = vars(args)
+    exclude_keys = ["save_dir", "cache_dir", "device", "true_label", "threshold", "parallelize", "split"]
+    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
+    return filename
+
+
 def load_single_generation(args, generation_type="hidden_states"):
     # use the same filename as in save_generations
-    arg_dict = vars(args)
-    exclude_keys = ["save_dir", "cache_dir", "device"]
-    filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
+    filename = get_generation_file_name(args, generation_type)
     return np.load(os.path.join(args.save_dir, filename))
 
 
