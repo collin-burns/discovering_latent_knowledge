@@ -60,6 +60,7 @@ def get_parser():
                         help="True label choosing from dataset")
     # saving the hidden states
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
+    parser.add_argument("--threshold", type=float, default=0.3, help="threshold to decide label in jigsaw_unintended_bias")
     return parser
 
 
@@ -274,16 +275,34 @@ class ContrastDataset(Dataset):
         # return the tokenized inputs, the text prompts, and the true label
         return neg_ids, pos_ids, neg_prompt, pos_prompt, true_answer
 
-def toxic_function_preprocess(true_label):
-    def toxic_preprocess(item):
-        item["text"] = item["comment_text"]
-        item["label"] = item[true_label]
-        return item
 
-    return toxic_preprocess
+def toxic_function_preprocess(dataset_name, true_label, threshold):
+
+    if dataset_name == "jigsaw":
+        def toxic_preprocess(item):
+            item["text"] = item["comment_text"]
+            item["label"] = item[true_label]
+            return item
+
+        return toxic_preprocess
+    elif dataset_name == "jigsaw_unintended_bias":
+        def toxic_preprocess(item):
+            item["text"] = item["comment_text"]
+            if item["target"] > threshold:
+                item["label"] = 1
+            else:
+                item["label"] = 0
+            return item
+
+        return toxic_preprocess
+    else:
+        def func_def(item):
+            return item
+        return func_def
+
 
 def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
-                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic"):
+                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic", threshold=0.3):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -291,7 +310,7 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     """
     # load the raw dataset
     raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
-    preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(true_label))
+    preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label))
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
