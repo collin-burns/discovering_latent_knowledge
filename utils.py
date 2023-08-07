@@ -113,7 +113,7 @@ def save_generations(generation, args, generation_type):
     """
     # construct the filename based on the args
     arg_dict = vars(args)
-    exclude_keys = ["save_dir", "cache_dir", "device"]
+    exclude_keys = ["save_dir", "cache_dir", "device", "true_label", "threshold"]
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items() if k not in exclude_keys]) + ".npy".format(generation_type)
 
     # create save directory if it doesn't exist
