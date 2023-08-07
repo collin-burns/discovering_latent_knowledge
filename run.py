@@ -21,7 +21,8 @@ def parse_config():
     return config
 
 
-def generate_and_evaluate(run_args, model, dataset, num_examples, prompt_idx):
+def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
+    run_args = run_parser.parse_args()
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
     dataset_name = dataset['dataset_name']
@@ -36,7 +37,7 @@ def generate_and_evaluate(run_args, model, dataset, num_examples, prompt_idx):
     generate.main(run_args)
     print(f"Running evaluate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
           f"dataset {dataset_name} in {dataset_dir}")
-    evaluate.main(get_parser())
+    evaluate.main(run_parser)
 
 
 def copy_templates_file(templates_file_path):
@@ -78,7 +79,6 @@ if __name__ == '__main__':
     num_examples_l = yaml_config['num_training_examples']
 
     args_parser = get_parser()
-    args = args_parser.parse_args()
     for model_name in models:
         for dataset_obj in datasets:
             template_file_path = dataset_obj['template_file_path']
@@ -86,4 +86,4 @@ if __name__ == '__main__':
             for n_examples in num_examples_l:
                 prompt_indices = get_prompt_indices(dataset_obj)
                 for i in prompt_indices:
-                    generate_and_evaluate(args, model_name, dataset_obj, n_examples, i)
+                    generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i)
