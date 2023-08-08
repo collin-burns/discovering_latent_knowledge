@@ -425,7 +425,7 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         # first we need to get the first mask location for each example in the batch
         assert token_idx < 0, print("token_idx must be either 0 or negative, but got", token_idx)
         mask = batch_ids["decoder_attention_mask"] if (model_type == "encoder_decoder" and use_decoder) else batch_ids["attention_mask"]
-        first_mask_loc = get_first_mask_loc(mask).squeeze().cpu()
+        first_mask_loc = get_first_mask_loc(mask).squeeze().cpu() # fix to an issue
         final_hs = hs[torch.arange(hs.size(0)), first_mask_loc+token_idx]  # (bs, dim, num_layers)
     
     return final_hs
