@@ -363,7 +363,15 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     # create and return the corresponding dataloader
         random.shuffle(keep_idxs)
     else:
-        pass
+        for idx in random_idxs:
+            question, answer = prompt.apply(preprocessed_dataset[int(idx)])
+            input_text = question + " " + answer
+            if len(tokenizer.encode(input_text,
+                                    truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+                keep_idxs.append(idx)
+                if len(keep_idxs) >= num_examples:
+                    break
+
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
     dataloader = DataLoader(subset_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory, num_workers=num_workers)
 
