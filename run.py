@@ -1,4 +1,3 @@
-import os.path
 import yaml
 import argparse
 import site
@@ -41,10 +40,9 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
 
 
 def copy_templates_file(templates_file_path, dataset_name):
-    templates_file_name = os.path.basename(templates_file_path)
     site_packages_path = site.getsitepackages()[0]
     template_path_suffix = f"promptsource/templates/{dataset_name}"
-    templates_file_target_path = f"{site_packages_path}/{template_path_suffix}/{templates_file_name}"
+    templates_file_target_path = f"{site_packages_path}/{template_path_suffix}/templates.yaml"
     print(f"Copying templates file {templates_file_path} to {templates_file_target_path}")
     shutil.os.system(f"sudo cp {templates_file_path} {templates_file_target_path}")
     print("Successfully copied templates file")
