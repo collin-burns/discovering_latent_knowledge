@@ -78,7 +78,6 @@ if __name__ == '__main__':
     models = yaml_config['models']
     num_examples_l = yaml_config['num_training_examples']
 
-    args_parser = get_parser()
     for model_name in models:
         for dataset_obj in datasets:
             template_file_path = dataset_obj['template_file_path']
@@ -86,4 +85,5 @@ if __name__ == '__main__':
             for n_examples in num_examples_l:
                 prompt_indices = get_prompt_indices(dataset_obj)
                 for i in prompt_indices:
+                    args_parser = get_parser()
                     generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i)
