@@ -2,6 +2,7 @@ import os
 import functools
 import argparse
 import copy
+import random
 
 import numpy as np
 import pandas as pd
@@ -61,6 +62,7 @@ def get_parser():
     # saving the hidden states
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
     parser.add_argument("--threshold", type=float, default=0.3, help="threshold to decide label in jigsaw_unintended_bias")
+    parser.add_argument("--no_data_balance", action="store_true", help="flag to decide to balance the data or not")
     return parser
 
 
@@ -125,7 +127,7 @@ def save_generations(generation, args, generation_type):
 def get_generation_file_name(args, generation_type):
     arg_dict = vars(args)
     exclude_keys = ["save_dir", "cache_dir", "device", "true_label", "threshold", "parallelize", "split",
-                    "use_decoder", "all_layers"]
+                    "use_decoder", "all_layers", "no_data_balance"]
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items()
                                                    if k not in exclude_keys]) + ".npy".format(generation_type)
     return filename
@@ -307,7 +309,7 @@ def toxic_function_preprocess(dataset_name, true_label, threshold):
 
 
 def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
-                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic", threshold=0.3):
+                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic", threshold=0.3, no_data_balance=False):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -319,7 +321,6 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
-    print(all_prompts.name_to_id_mapping)
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(preprocessed_dataset, tokenizer, all_prompts, prompt_idx,
                                        model_type=model_type, use_decoder=use_decoder, 
@@ -332,15 +333,46 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
     prompt = all_prompts[prompt_name_list[prompt_idx]]
     keep_idxs = []
-    for idx in random_idxs:
-        question, answer = prompt.apply(preprocessed_dataset[int(idx)])
-        input_text = question + " " + answer
-        if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
-            keep_idxs.append(idx)
-            if len(keep_idxs) >= num_examples:
-                break
-
+    if no_data_balance:
+        for idx in random_idxs:
+            question, answer = prompt.apply(preprocessed_dataset[int(idx)])
+            input_text = question + " " + answer
+            if len(tokenizer.encode(input_text,
+                                    truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+                keep_idxs.append(idx)
+                if len(keep_idxs) >= num_examples:
+                    break
+    else:
+        print("Balancing Data")
+        pos_count = 0
+        neg_count = 0 if num_examples % 2 == 0 else -1  # if num examples is odd get another negative result
+        i = 0
+        while i < len(random_idxs):
+            idx = random_idxs[i]
+            # balanced sampling - equal num of yes/no
+            sample = preprocessed_dataset[int(idx)]
+            question, answer = prompt.apply(sample)
+            input_text = question + " " + answer
+            if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+                if sample["label"] == 0 and neg_count < num_examples // 2:
+                    neg_count += 1
+                    i += 1
+                elif sample["label"] == 1 and pos_count < num_examples // 2:
+                    pos_count += 1
+                    i += 1
+                elif i < len(random_idxs):
+                    i += 1
+                    continue
+                keep_idxs.append(idx)
+                if len(keep_idxs) >= num_examples:
+                    break
+            else:
+                i += 1
+        if len(keep_idxs) != num_examples:
+            print("WARNING: Balancing data did not work")
     # create and return the corresponding dataloader
+        random.shuffle(keep_idxs)
+
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
     dataloader = DataLoader(subset_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory, num_workers=num_workers)
 
@@ -407,7 +439,7 @@ def get_individual_hidden_states(model, batch_ids, layer=None, all_layers=True, 
         # first we need to get the first mask location for each example in the batch
         assert token_idx < 0, print("token_idx must be either 0 or negative, but got", token_idx)
         mask = batch_ids["decoder_attention_mask"] if (model_type == "encoder_decoder" and use_decoder) else batch_ids["attention_mask"]
-        first_mask_loc = get_first_mask_loc(mask).squeeze()
+        first_mask_loc = get_first_mask_loc(mask).squeeze().cpu() # fix to an issue
         final_hs = hs[torch.arange(hs.size(0)), first_mask_loc+token_idx]  # (bs, dim, num_layers)
     
     return final_hs
