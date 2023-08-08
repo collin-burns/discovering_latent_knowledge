@@ -357,9 +357,8 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
                 break
         else:
             i += 1
-    print(keep_idxs[:10], len(keep_idxs), i, len(random_idxs))
-    print(pos_count, neg_count)
-    print(len(contrast_dataset))
+    if len(keep_idxs) != num_examples:
+        print("WARNING: Balancing data did not work")
     # create and return the corresponding dataloader
     random.shuffle(keep_idxs)
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
