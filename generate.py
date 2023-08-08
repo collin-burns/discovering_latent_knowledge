@@ -9,7 +9,7 @@ def main(args):
     print("Loading dataloader")
     dataloader = get_dataloader(args.dataset_name, args.dataset_dir, args.split, tokenizer, args.prompt_idx, batch_size=args.batch_size, 
                                 num_examples=args.num_examples, model_type=model_type, use_decoder=args.use_decoder, device=args.device,\
-                                true_label=args.true_label, threshold=args.threshold)
+                                true_label=args.true_label, threshold=args.threshold, balance_data=args.balance_data)
     # Get the hidden states and labels
     print("Generating hidden states")
     neg_hs, pos_hs, y = get_all_hidden_states(model, dataloader, layer=args.layer, all_layers=args.all_layers, 

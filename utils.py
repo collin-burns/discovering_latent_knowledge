@@ -62,6 +62,7 @@ def get_parser():
     # saving the hidden states
     parser.add_argument("--save_dir", type=str, default="generated_hidden_states", help="Directory to save the hidden states")
     parser.add_argument("--threshold", type=float, default=0.3, help="threshold to decide label in jigsaw_unintended_bias")
+    parser.add_argument("--balance_data", type=bool, default=True, help="flag to decide to balance the data or not")
     return parser
 
 
@@ -308,7 +309,7 @@ def toxic_function_preprocess(dataset_name, true_label, threshold):
 
 
 def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batch_size=16, num_examples=1000,
-                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic", threshold=0.3):
+                   model_type="encoder_decoder", use_decoder=False, device="cuda", pin_memory=True, num_workers=1, true_label="toxic", threshold=0.3, balance_data=True):
     """
     Creates a dataloader for a given dataset (and its split), tokenizer, and prompt index
 
@@ -332,35 +333,37 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
     prompt = all_prompts[prompt_name_list[prompt_idx]]
     keep_idxs = []
-    pos_count = 0
-    neg_count = 0 if num_examples % 2 == 0 else -1  # if num examples is odd get another negative result
-    i = 0
-
-    while i < len(random_idxs):
-        idx = random_idxs[i]
-        # balanced sampling - equal num of yes/no
-        sample = preprocessed_dataset[int(idx)]
-        question, answer = prompt.apply(sample)
-        input_text = question + " " + answer
-        if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
-            if sample["label"] == 0 and neg_count < num_examples // 2:
-                neg_count += 1
+    if balance_data:
+        pos_count = 0
+        neg_count = 0 if num_examples % 2 == 0 else -1  # if num examples is odd get another negative result
+        i = 0
+        while i < len(random_idxs):
+            idx = random_idxs[i]
+            # balanced sampling - equal num of yes/no
+            sample = preprocessed_dataset[int(idx)]
+            question, answer = prompt.apply(sample)
+            input_text = question + " " + answer
+            if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+                if sample["label"] == 0 and neg_count < num_examples // 2:
+                    neg_count += 1
+                    i += 1
+                elif sample["label"] == 1 and pos_count < num_examples // 2:
+                    pos_count += 1
+                    i += 1
+                elif i < len(random_idxs):
+                    i += 1
+                    continue
+                keep_idxs.append(idx)
+                if len(keep_idxs) >= num_examples:
+                    break
+            else:
                 i += 1
-            elif sample["label"] == 1 and pos_count < num_examples // 2:
-                pos_count += 1
-                i += 1
-            elif i < len(random_idxs):
-                i += 1
-                continue
-            keep_idxs.append(idx)
-            if len(keep_idxs) >= num_examples:
-                break
-        else:
-            i += 1
-    if len(keep_idxs) != num_examples:
-        print("WARNING: Balancing data did not work")
+        if len(keep_idxs) != num_examples:
+            print("WARNING: Balancing data did not work")
     # create and return the corresponding dataloader
-    random.shuffle(keep_idxs)
+        random.shuffle(keep_idxs)
+    else:
+        pass
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
     dataloader = DataLoader(subset_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory, num_workers=num_workers)
 
