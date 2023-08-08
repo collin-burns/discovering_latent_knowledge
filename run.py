@@ -20,7 +20,7 @@ def parse_config():
     return config
 
 
-def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
+def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance):
     run_args = run_parser.parse_args()
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
@@ -30,6 +30,7 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
     run_args.dataset_dir = dataset_dir
     run_args.num_examples = num_examples
     run_args.prompt_idx = prompt_idx
+    run_args.no_data_balance = no_data_balance
     print("-" * 200)
     print(f"Running generate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
           f"dataset {dataset_name} in directory {dataset_dir}")
@@ -75,13 +76,16 @@ if __name__ == '__main__':
     datasets = yaml_config['datasets']
     models = yaml_config['models']
     num_examples_l = yaml_config['num_training_examples']
+    no_data_balance_l = yaml_config['no_data_balance']
 
     for model_name in models:
         for dataset_obj in datasets:
-            template_file_path = dataset_obj['template_file_path']
-            copy_templates_file(template_file_path, dataset_obj['dataset_name'])
+            template_file_path = dataset_obj.get('template_file_path')
+            if template_file_path is not None:
+                copy_templates_file(template_file_path, dataset_obj['dataset_name'])
             for n_examples in num_examples_l:
                 prompt_indices = get_prompt_indices(dataset_obj, template_file_path)
                 for i in prompt_indices:
-                    args_parser = get_parser()
-                    generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i)
+                    for should_data_balance in no_data_balance_l:
+                        args_parser = get_parser()
+                        generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i, should_data_balance)

@@ -1,17 +1,20 @@
-
 datasets:
   - dataset_name: jigsaw_toxicity_pred
     dataset_dir: toxic_dataset_jigsaw
     template_file_path: templates/jigsaw-toxicity-pred-templates.yaml
     prompt_indices: []
+  - dataset_name: jigsaw_unintended_bias
+    dataset_dir: jigsaw_unintended_bias
+    prompt_indices: [1, 5, 6, 8, 9]
 
 models:
-  - gpt-j
-  - T0pp
-  - unifiedqa
   - deberta-mnli
   - deberta
   - roberta-mnli
+  - gpt-j
+  - T0pp
+  - unifiedqa
+  - T5
 
 num_training_examples:
   - 1000
@@ -19,3 +22,7 @@ num_training_examples:
   - 3000
   - 4000
   - 5000
+
+no_data_balance:
+  - True
+  - False
