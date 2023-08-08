@@ -357,7 +357,7 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
                 break
         else:
             i += 1
-
+    print(keep_idxs, len(keep_idxs), i)
     # create and return the corresponding dataloader
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
     dataloader = DataLoader(subset_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory, num_workers=num_workers)
