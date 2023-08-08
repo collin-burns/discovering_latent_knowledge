@@ -46,7 +46,7 @@ def copy_templates_file(templates_file_path, dataset_name):
     template_path_suffix = f"promptsource/templates/{dataset_name}"
     templates_file_target_path = f"{site_packages_path}/{template_path_suffix}/{templates_file_name}"
     print(f"Copying templates file {templates_file_path} to {templates_file_target_path}")
-    shutil.copyfile(templates_file_path, templates_file_target_path)
+    shutil.os.system(f"sudo cp {templates_file_path} {templates_file_target_path}")
     print("Successfully copied templates file")
 
 
