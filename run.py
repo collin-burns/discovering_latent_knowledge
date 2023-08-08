@@ -58,14 +58,14 @@ def get_num_prompts(templates_file_path, dataset_name):
     raise Exception(f"No prompts found for {dataset_name}.")
 
 
-def get_prompt_indices(dataset):
+def get_prompt_indices(dataset, template_path):
     dataset_prompt_indices = dataset['prompt_indices']
     # We have selected specific indices in the config file
     if len(dataset_prompt_indices) > 0:
         return dataset_prompt_indices
     # Use all prompts in the templates file
     else:
-        num_prompts = get_num_prompts(template_file_path, dataset['dataset_name'])
+        num_prompts = get_num_prompts(template_path, dataset['dataset_name'])
         return range(num_prompts)
 
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
             template_file_path = dataset_obj['template_file_path']
             copy_templates_file(template_file_path, dataset_obj['dataset_name'])
             for n_examples in num_examples_l:
-                prompt_indices = get_prompt_indices(dataset_obj)
+                prompt_indices = get_prompt_indices(dataset_obj, template_file_path)
                 for i in prompt_indices:
                     args_parser = get_parser()
                     generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i)
