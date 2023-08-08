@@ -2,7 +2,7 @@
 datasets:
   - dataset_name: jigsaw_toxicity_pred
     dataset_dir: toxic_dataset_jigsaw
-    template_file_path: templates/templates.yaml
+    template_file_path: templates/jigsaw-toxicity-pred-templates.yaml
     prompt_indices: []
 
 models:
