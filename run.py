@@ -94,3 +94,4 @@ if __name__ == '__main__':
                     for should_data_balance in no_data_balance_l:
                         args_parser = get_parser()
                         generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i, should_data_balance)
+    print("Finished running generate and evaluate with all model configurations")
