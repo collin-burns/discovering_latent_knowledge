@@ -2,6 +2,7 @@ import os
 import functools
 import argparse
 import copy
+import random
 
 import numpy as np
 import pandas as pd
@@ -319,7 +320,6 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
 
     # load all the prompts for that dataset
     all_prompts = DatasetTemplates(dataset_name)
-    print(all_prompts.name_to_id_mapping)
     # create the ConstrastDataset
     contrast_dataset = ContrastDataset(preprocessed_dataset, tokenizer, all_prompts, prompt_idx,
                                        model_type=model_type, use_decoder=use_decoder, 
@@ -359,8 +359,9 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             i += 1
     print(keep_idxs[:10], len(keep_idxs), i, len(random_idxs))
     print(pos_count, neg_count)
-    print(len(contrast_dataset), contrast_dataset[:2])
+    print(len(contrast_dataset))
     # create and return the corresponding dataloader
+    random.shuffle(keep_idxs)
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
     dataloader = DataLoader(subset_dataset, batch_size=batch_size, shuffle=False, pin_memory=pin_memory, num_workers=num_workers)
 
