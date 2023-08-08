@@ -32,12 +32,12 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, 
     run_args.prompt_idx = prompt_idx
     run_args.no_data_balance = no_data_balance
     print("-" * 200)
-    args_string = f"Model: '{model}'\n"
-    f"Prompt Number: '{prompt_idx}'\n"
-    f"Number of Examples: '{num_examples}'\n"
-    f"Dataset Name: '{dataset_name}'\n"
-    f"Dataset Directory: '{dataset_dir}'\n"
-    f"No Data Balance: '{no_data_balance}'\n"
+    args_string = f"Model: '{model}'\n" \
+                  f"Prompt Number: '{prompt_idx}'\n" \
+                  f"Number of Examples: '{num_examples}'\n" \
+                  f"Dataset Name: '{dataset_name}'\n" \
+                  f"Dataset Directory: '{dataset_dir}'\n" \
+                  f"No Data Balance: '{no_data_balance}'\n"
 
     print(f"Running generate with the following arguments:\n {args_string}")
     generate.main(run_args)
