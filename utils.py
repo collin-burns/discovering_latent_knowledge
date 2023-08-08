@@ -332,8 +332,27 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     prompt_name_list = list(all_prompts.name_to_id_mapping.keys())
     prompt = all_prompts[prompt_name_list[prompt_idx]]
     keep_idxs = []
-    for idx in random_idxs:
-        question, answer = prompt.apply(preprocessed_dataset[int(idx)])
+    pos_count = 0
+    neg_count = 0 if num_examples % 2 == 0 else -1  # if num examples is odd get another negative result
+    i = 0
+
+    while i < len(random_idxs):
+        idx = random_idxs[i]
+        # balanced sampling - equal num of yes/no
+        sample = preprocessed_dataset[int(idx)]
+        if sample["label"] == 0 and neg_count < num_examples // 2:
+            neg_count += 1
+            i += 1
+        elif sample["label"] == 1 and pos_count < num_examples // 2:
+            pos_count += 1
+            i += 1
+        elif i == len(random_idxs):
+            break
+        else:
+            i += 1
+            continue
+
+        question, answer = prompt.apply(sample)
         input_text = question + " " + answer
         if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
             keep_idxs.append(idx)
