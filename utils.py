@@ -340,24 +340,23 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
         idx = random_idxs[i]
         # balanced sampling - equal num of yes/no
         sample = preprocessed_dataset[int(idx)]
-        if sample["label"] == 0 and neg_count < num_examples // 2:
-            neg_count += 1
-            i += 1
-        elif sample["label"] == 1 and pos_count < num_examples // 2:
-            pos_count += 1
-            i += 1
-        elif i == len(random_idxs):
-            break
-        else:
-            i += 1
-            continue
-
         question, answer = prompt.apply(sample)
         input_text = question + " " + answer
         if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+            if sample["label"] == 0 and neg_count < num_examples // 2:
+                neg_count += 1
+                i += 1
+            elif sample["label"] == 1 and pos_count < num_examples // 2:
+                pos_count += 1
+                i += 1
+            elif i < len(random_idxs):
+                i += 1
+                continue
             keep_idxs.append(idx)
             if len(keep_idxs) >= num_examples:
                 break
+        else:
+            i += 1
 
     # create and return the corresponding dataloader
     subset_dataset = torch.utils.data.Subset(contrast_dataset, keep_idxs)
