@@ -40,10 +40,10 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
     evaluate.main(run_parser, run_args)
 
 
-def copy_templates_file(templates_file_path):
+def copy_templates_file(templates_file_path, dataset_name):
     templates_file_name = os.path.basename(templates_file_path)
     site_packages_path = site.getsitepackages()[0]
-    template_path_suffix = "promptsource/templates"
+    template_path_suffix = f"promptsource/templates/{dataset_name}"
     templates_file_target_path = f"{site_packages_path}/{template_path_suffix}/{templates_file_name}"
     print(f"Copying templates file {templates_file_path} to {templates_file_target_path}")
     shutil.copyfile(templates_file_path, templates_file_target_path)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     for model_name in models:
         for dataset_obj in datasets:
             template_file_path = dataset_obj['template_file_path']
-            copy_templates_file(template_file_path)
+            copy_templates_file(template_file_path, dataset_obj['dataset_name'])
             for n_examples in num_examples_l:
                 prompt_indices = get_prompt_indices(dataset_obj)
                 for i in prompt_indices:
