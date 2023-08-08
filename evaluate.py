@@ -1,8 +1,8 @@
 from sklearn.linear_model import LogisticRegression
 from utils import get_parser, load_all_generations, CCS
 
-def main(parser):
-    generation_args = parser.parse_args()  # we'll use this to load the correct hidden states + labels
+
+def main(parser, generation_args):
     # We'll also add some additional args for evaluation
     parser.add_argument("--nepochs", type=int, default=1000)
     parser.add_argument("--ntries", type=int, default=10)

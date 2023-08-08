@@ -37,7 +37,7 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx):
     generate.main(run_args)
     print(f"Running evaluate using model '{model}' and prompt number {prompt_idx} with {num_examples} examples from "
           f"dataset {dataset_name} in {dataset_dir}")
-    evaluate.main(run_parser)
+    evaluate.main(run_parser, run_args)
 
 
 def copy_templates_file(templates_file_path):
