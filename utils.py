@@ -294,6 +294,7 @@ def toxic_function_preprocess(dataset_name, true_label, threshold):
         return toxic_preprocess
     elif dataset_name == "jigsaw_unintended_bias":
         def toxic_preprocess(item):
+
             item["text"] = item["comment_text"]
             if item["target"] > threshold:
                 item["label"] = 1
@@ -459,11 +460,10 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
     """
     all_pos_hs, all_neg_hs = [], []
     all_gt_labels = []
-
     model.eval()
     for batch in tqdm(dataloader):
         neg_ids, pos_ids, _, _, gt_label = batch
-
+        print(batch)
         neg_hs = get_individual_hidden_states(model, neg_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
         pos_hs = get_individual_hidden_states(model, pos_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 

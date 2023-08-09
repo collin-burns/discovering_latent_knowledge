@@ -16,7 +16,7 @@ templates:
       choices_in_prompt: true
       metrics:
       - Accuracy
-      original_task: true
+      original_task: false
     name: moderator
     reference: ''
   5e06b59c-9888-47b1-a982-b90bced2d6a2: !Template
@@ -36,7 +36,7 @@ templates:
       choices_in_prompt: true
       metrics:
       - Accuracy
-      original_task: true
+      original_task: false
     name: browsing
     reference: ''
   68962b6a-2ed3-48d5-ba7c-9f023e314592: !Template
@@ -49,7 +49,7 @@ templates:
       choices_in_prompt: true
       metrics:
       - Accuracy
-      original_task: true
+      original_task: false
     name: binary_pred
     reference: ''
   71508d0b-7fd9-4810-933c-c3c59f0c5329: !Template
@@ -62,10 +62,10 @@ templates:
 
       {{answer_choices[label]}} '
     metadata: !TemplateMetadata
-      choices_in_prompt: null
+      choices_in_prompt: false
       metrics:
       - Accuracy
-      original_task: true
+      original_task: false
     name: yes_or_no
     reference: ''
   71508d1b-7fd9-4810-933c-c3c59f0c5329: !Template
