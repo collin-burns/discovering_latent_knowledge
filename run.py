@@ -1,3 +1,4 @@
+import os
 import yaml
 import argparse
 import site
@@ -79,6 +80,8 @@ def get_prompt_indices(dataset, template_path):
 
 
 if __name__ == '__main__':
+    # Set TOKENIZERS_PARALLELISM in order to avoid huggingface warnings
+    os.environ['TOKENIZERS_PARALLELISM'] = "false"
     yaml_config, dvc = parse_config()
 
     datasets = yaml_config['datasets']
