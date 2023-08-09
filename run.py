@@ -46,9 +46,9 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx,
                   f"No Data Balance: '{no_data_balance}'\n" \
                   f"Toxicity Threshold: '{threshold}'"
 
-    print(f"Running generate with the following arguments:\n {args_string}")
+    print(f"Running generate with the following arguments:\n{args_string}")
     generate.main(run_args)
-    print(f"Running evaluate with the following arguments:\n {args_string}")
+    print(f"Running evaluate with the following arguments:\n{args_string}")
     evaluate.main(run_parser, run_args)
 
 
