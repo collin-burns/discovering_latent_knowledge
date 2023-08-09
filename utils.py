@@ -317,7 +317,6 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     """
     # load the raw dataset
     ds = load_dataset(dataset_name, data_dir=dataset_dir)
-    print(ds.keys())
     raw_dataset = ds[split]
     preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label, threshold))
 
@@ -342,6 +341,7 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             if len(tokenizer.encode(input_text,
                                     truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
                 keep_idxs.append(idx)
+                print(input_text)
                 if len(keep_idxs) >= num_examples:
                     break
     else:
@@ -355,7 +355,9 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             sample = preprocessed_dataset[int(idx)]
             question, answer = prompt.apply(sample)
             input_text = question + " " + answer
+
             if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
+                print(input_text)
                 if sample["label"] == 0 and neg_count < num_examples // 2:
                     neg_count += 1
                     i += 1
