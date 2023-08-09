@@ -15,7 +15,7 @@ templates:
     metadata: !TemplateMetadata
       choices_in_prompt: true
       metrics:
-      - Other
+      - Accuracy
       original_task: true
     name: moderator
     reference: ''
@@ -35,7 +35,7 @@ templates:
     metadata: !TemplateMetadata
       choices_in_prompt: true
       metrics:
-      - Other
+      - Accuracy
       original_task: true
     name: browsing
     reference: ''
@@ -48,7 +48,7 @@ templates:
     metadata: !TemplateMetadata
       choices_in_prompt: true
       metrics:
-      - Other
+      - Accuracy
       original_task: true
     name: binary_pred
     reference: ''
@@ -64,7 +64,7 @@ templates:
     metadata: !TemplateMetadata
       choices_in_prompt: null
       metrics:
-      - Other
+      - Accuracy
       original_task: true
     name: yes_or_no
     reference: ''
@@ -82,7 +82,7 @@ templates:
     metadata: !TemplateMetadata
       choices_in_prompt: true
       metrics:
-      - Other
+      - Accuracy
       original_task: true
     name: yes_or_no_remove
     reference: ''
