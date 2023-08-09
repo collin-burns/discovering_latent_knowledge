@@ -89,7 +89,7 @@ if __name__ == '__main__':
     for model_name in models:
         for dataset_obj in datasets:
             template_file_path = dataset_obj.get('template_file_path')
-            data_split = dataset_obj['split']
+            data_split = dataset_obj['data_split']
             if template_file_path is not None:
                 copy_templates_file(template_file_path, dataset_obj['dataset_name'])
             for n_examples in num_examples_l:
