@@ -72,14 +72,14 @@ def get_num_prompts(templates_file_path, dataset_name):
 
 
 def get_prompt_indices(dataset, template_path):
-    dataset_prompt_indices = dataset['prompt_indices']
-    # We have selected specific indices in the config file
-    if len(dataset_prompt_indices) > 0:
-        return dataset_prompt_indices
+    dataset_prompt_indices = dataset.get('prompt_indices')
     # Use all prompts in the templates file
-    else:
+    if dataset_prompt_indices is None or len(dataset_prompt_indices) == 0:
         num_prompts = get_num_prompts(template_path, dataset['dataset_name'])
         return range(num_prompts)
+    # We have selected specific indices in the config file
+    else:
+        return dataset_prompt_indices
 
 
 if __name__ == '__main__':
