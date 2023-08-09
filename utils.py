@@ -342,7 +342,6 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             if len(tokenizer.encode(input_text,
                                     truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
                 keep_idxs.append(idx)
-                print(input_text)
                 if len(keep_idxs) >= num_examples:
                     break
     else:
@@ -358,7 +357,6 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             input_text = question + " " + answer
 
             if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
-                print(input_text)
                 if sample["label"] == 0 and neg_count < num_examples // 2:
                     neg_count += 1
                     i += 1
@@ -463,7 +461,6 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
     model.eval()
     for batch in tqdm(dataloader):
         neg_ids, pos_ids, _, _, gt_label = batch
-        print(batch)
         neg_hs = get_individual_hidden_states(model, neg_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
         pos_hs = get_individual_hidden_states(model, pos_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
@@ -566,8 +563,6 @@ class CCS(object):
             p0, p1 = self.best_probe(x0), self.best_probe(x1)
         avg_confidence = 0.5*(p0 + (1-p1))
         predictions = (avg_confidence.detach().cpu().numpy() < 0.5).astype(int)[:, 0]
-        print(y_test)
-        print(predictions)
         acc = (predictions == y_test).mean()
         acc = max(acc, 1 - acc)
 
