@@ -294,6 +294,7 @@ def toxic_function_preprocess(dataset_name, true_label, threshold):
         return toxic_preprocess
     elif dataset_name == "jigsaw_unintended_bias":
         def toxic_preprocess(item):
+
             item["text"] = item["comment_text"]
             if item["target"] > threshold:
                 item["label"] = 1
@@ -316,7 +317,8 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
+    ds = load_dataset(dataset_name, data_dir=dataset_dir)
+    raw_dataset = ds[split]
     preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label, threshold))
 
     # load all the prompts for that dataset
@@ -353,6 +355,7 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
             sample = preprocessed_dataset[int(idx)]
             question, answer = prompt.apply(sample)
             input_text = question + " " + answer
+
             if len(tokenizer.encode(input_text, truncation=False)) < tokenizer.model_max_length - 2:  # include small margin to be conservative
                 if sample["label"] == 0 and neg_count < num_examples // 2:
                     neg_count += 1
@@ -455,11 +458,9 @@ def get_all_hidden_states(model, dataloader, layer=None, all_layers=True, token_
     """
     all_pos_hs, all_neg_hs = [], []
     all_gt_labels = []
-
     model.eval()
     for batch in tqdm(dataloader):
         neg_ids, pos_ids, _, _, gt_label = batch
-
         neg_hs = get_individual_hidden_states(model, neg_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
                                               model_type=model_type, use_decoder=use_decoder)
         pos_hs = get_individual_hidden_states(model, pos_ids, layer=layer, all_layers=all_layers, token_idx=token_idx, 
