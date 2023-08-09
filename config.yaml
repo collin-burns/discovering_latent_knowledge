@@ -26,11 +26,10 @@ models:
     device: cpu
 
 num_training_examples:
+  - 500
   - 1000
+  - 1500
   - 2000
-  - 3000
-  - 4000
-  - 5000
 
 no_data_balance:
   - True
