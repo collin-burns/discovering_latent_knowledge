@@ -104,8 +104,9 @@ if __name__ == '__main__':
                 prompt_indices = get_prompt_indices(dataset_obj, template_file_path)
                 for i in prompt_indices:
                     for should_data_balance in no_data_balance_l:
-                        # Iterate over thresholds if we've set them in the config
-                        for toxic_threshold in (dataset_obj.get('thresholds') or []):
+                        # Iterate over thresholds if we've set them in the config,
+                        # or use some arbitrary value when it's not set
+                        for toxic_threshold in (dataset_obj.get('thresholds') or [0]):
                             args_parser = get_parser()
                             generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i,
                                                   should_data_balance, model_device, data_split, toxic_threshold)
