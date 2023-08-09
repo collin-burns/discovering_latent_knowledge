@@ -564,6 +564,8 @@ class CCS(object):
             p0, p1 = self.best_probe(x0), self.best_probe(x1)
         avg_confidence = 0.5*(p0 + (1-p1))
         predictions = (avg_confidence.detach().cpu().numpy() < 0.5).astype(int)[:, 0]
+        print(y_test)
+        print(predictions)
         acc = (predictions == y_test).mean()
         acc = max(acc, 1 - acc)
 
