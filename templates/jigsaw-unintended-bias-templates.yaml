@@ -7,7 +7,7 @@ templates:
       remove uncivil comments. Would you {{answer_choices[1]}} or {{answer_choices[0]}}
       the following comment?
 
-      "{{comment_text}}"
+      "{{text}}"
 
       |||
 
@@ -25,7 +25,7 @@ templates:
     jinja: 'You are browsing the comment section of a website. You read the following
       comment:
 
-      "{{comment_text}}"
+      "{{text}}"
 
       Would you classify that comment as {{answer_choices[0]}} or {{answer_choices[1]}}?
 
@@ -42,7 +42,7 @@ templates:
   68962b6a-2ed3-48d5-ba7c-9f023e314592: !Template
     answer_choices: civil ||| toxic
     id: 68962b6a-2ed3-48d5-ba7c-9f023e314592
-    jinja: "Someone posted the following comment online:\n\n\"{{comment_text}}\"\n\
+    jinja: "Someone posted the following comment online:\n\n\"{{text}}\"\n\
       \nWould you classify it as {{answer_choices[0]}} or {{answer_choices[1]}}?\n\
       \n||| \n\n{{answer_choices[label]}}\n\n"
     metadata: !TemplateMetadata
@@ -55,7 +55,7 @@ templates:
   71508d0b-7fd9-4810-933c-c3c59f0c5329: !Template
     answer_choices: no ||| yes
     id: 71508d0b-7fd9-4810-933c-c3c59f0c5329
-    jinja: '"{{comment_text}}" Someone posted this comment online. Do you find it
+    jinja: '"{{text}}" Someone posted this comment online. Do you find it
       toxic?
 
       |||
@@ -71,7 +71,7 @@ templates:
   71508d1b-7fd9-4810-933c-c3c59f0c5329: !Template
     answer_choices: no ||| yes
     id: 71508d1b-7fd9-4810-933c-c3c59f0c5329
-    jinja: '"{{comment_text}}"
+    jinja: '"{{text}}"
 
       Should this online comment be removed for its toxicity? {{answer_choices[1]}}
       or {{answer_choices[0]}}?
