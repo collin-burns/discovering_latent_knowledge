@@ -6,7 +6,7 @@ templates:
     jinja: Is the following statement toxic? {{text}} ||| {{ answer_choices
       [label] }}
     metadata: !TemplateMetadata
-      choices_in_prompt: false
+      choices_in_prompt: true
       languages:
       - en
       metrics:
@@ -20,7 +20,7 @@ templates:
     jinja: '{{text}} The writer expresses Toxicity in this comment: ||| {{ answer_choices
        [label] }}'
     metadata: !TemplateMetadata
-      choices_in_prompt: false
+      choices_in_prompt: true
       metrics:
         - Accuracy
       original_task: true
@@ -32,7 +32,7 @@ templates:
     jinja: Would you consider this as toxic? {{text}} ||| {{ answer_choices
       [label] }}
     metadata: !TemplateMetadata
-      choices_in_prompt: false
+      choices_in_prompt: true
       languages:
         - en
       metrics:
@@ -46,7 +46,7 @@ templates:
     jinja: the following statement {{text}} is ||| {{ answer_choices
       [label] }}
     metadata: !TemplateMetadata
-      choices_in_prompt: false
+      choices_in_prompt: true
       languages:
         - en
       metrics:

@@ -127,7 +127,7 @@ def save_generations(generation, args, generation_type):
 def get_generation_file_name(args, generation_type):
     arg_dict = vars(args)
     exclude_keys = ["save_dir", "cache_dir", "device", "true_label", "threshold", "parallelize", "split",
-                    "use_decoder", "all_layers", "no_data_balance"]
+                    "use_decoder", "all_layers", "no_data_balance", "dataset_dir"]
     filename = generation_type + "__" + "__".join(['{}_{}'.format(k, v) for k, v in arg_dict.items()
                                                    if k not in exclude_keys]) + ".npy".format(generation_type)
     return filename
