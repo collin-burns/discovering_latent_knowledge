@@ -29,5 +29,4 @@ num_training_examples:
   - 1500
 
 no_data_balance:
-  - True
   - False
