@@ -316,7 +316,9 @@ def get_dataloader(dataset_name, dataset_dir, split, tokenizer, prompt_idx, batc
     Takes a random subset of (at most) num_examples samples from the dataset that are not truncated by the tokenizer.
     """
     # load the raw dataset
-    raw_dataset = load_dataset(dataset_name, data_dir=dataset_dir)[split]
+    ds = load_dataset(dataset_name, data_dir=dataset_dir)
+    print(ds.keys())
+    raw_dataset = ds[split]
     preprocessed_dataset = raw_dataset.map(toxic_function_preprocess(dataset_name, true_label, threshold))
 
     # load all the prompts for that dataset
