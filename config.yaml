@@ -6,8 +6,9 @@ datasets:
     data_split: "train"
   - dataset_name: jigsaw_unintended_bias
     dataset_dir: jigsaw_unintended_bias
-    prompt_indices: [1, 5, 6, 8, 9]
-    data_split: "test"
+    template_file_path: templates/jigsaw-unintended-bias-templates.yaml
+    prompt_indices: []
+    data_split: "train"
 
 models:
   - deberta-mnli
