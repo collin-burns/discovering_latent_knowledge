@@ -1,24 +1,5 @@
 dataset: jigsaw_unintended_bias
 templates:
-  1add6d25-346e-4bf5-aa58-8dc184018f9e: !Template
-    answer_choices: keep ||| remove
-    id: 1add6d25-346e-4bf5-aa58-8dc184018f9e
-    jinja: 'You are the moderator of the comments section on a website. You want to
-      remove uncivil comments. Would you {{answer_choices[1]}} or {{answer_choices[0]}}
-      the following comment?
-
-      "{{text}}"
-
-      |||
-
-      {{answer_choices[label]}} '
-    metadata: !TemplateMetadata
-      choices_in_prompt: true
-      metrics:
-      - Accuracy
-      original_task: false
-    name: moderator
-    reference: ''
   5e06b59c-9888-47b1-a982-b90bced2d6a2: !Template
     answer_choices: civil ||| toxic
     id: 5e06b59c-9888-47b1-a982-b90bced2d6a2
@@ -38,19 +19,6 @@ templates:
       - Accuracy
       original_task: false
     name: browsing
-    reference: ''
-  68962b6a-2ed3-48d5-ba7c-9f023e314592: !Template
-    answer_choices: civil ||| toxic
-    id: 68962b6a-2ed3-48d5-ba7c-9f023e314592
-    jinja: "Someone posted the following comment online:\n\n\"{{text}}\"\n\
-      \nWould you classify it as {{answer_choices[0]}} or {{answer_choices[1]}}?\n\
-      \n||| \n\n{{answer_choices[label]}}\n\n"
-    metadata: !TemplateMetadata
-      choices_in_prompt: true
-      metrics:
-      - Accuracy
-      original_task: false
-    name: binary_pred
     reference: ''
   71508d0b-7fd9-4810-933c-c3c59f0c5329: !Template
     answer_choices: no ||| yes

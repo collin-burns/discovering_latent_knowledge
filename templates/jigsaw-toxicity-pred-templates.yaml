@@ -40,28 +40,3 @@ templates:
       original_task: true
     name: Toxicity Classify prompt 3
     reference: ''
-  05ff2949-0f45-4d97-941e-6fa4c0afbc2d: !Template
-    answer_choices: not toxic ||| toxic
-    id: 05ff2949-0f45-4d97-941e-6fa4c0afbc2d
-    jinja: the following statement {{text}} is ||| {{ answer_choices
-      [label] }}
-    metadata: !TemplateMetadata
-      choices_in_prompt: true
-      languages:
-        - en
-      metrics:
-        - Accuracy
-      original_task: true
-    name: Toxicity Classify prompt 4
-    reference: ''
-  5f372fb1-795a-47b6-8ddf-c4fd1579e76a: !Template
-    answer_choices: No ||| Yes
-    id: 5f372fb1-795a-47b6-8ddf-c4fd1579e76a
-    jinja: Is this review {{text}} Toxic {{\"No or Yes\"}}? ||| {{answer_choices[label] }}
-    metadata: !TemplateMetadata
-      choices_in_prompt: true
-      metrics:
-        - Accuracy
-      original_task: true
-    name: Toxicity Classify prompt 5
-    reference: ''
