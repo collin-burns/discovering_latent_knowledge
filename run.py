@@ -21,7 +21,7 @@ def parse_config():
     return config, parsed_args.device
 
 
-def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance, device):
+def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance, device, split):
     run_args = run_parser.parse_args()
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
@@ -33,6 +33,7 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, 
     run_args.prompt_idx = prompt_idx
     run_args.no_data_balance = no_data_balance
     run_args.device = device
+    run_args.split = split
     print("-" * 200)
     args_string = f"Model: '{model}'\n" \
                   f"Prompt Number: '{prompt_idx}'\n" \
@@ -88,6 +89,7 @@ if __name__ == '__main__':
     for model_name in models:
         for dataset_obj in datasets:
             template_file_path = dataset_obj.get('template_file_path')
+            data_split = dataset_obj['split']
             if template_file_path is not None:
                 copy_templates_file(template_file_path, dataset_obj['dataset_name'])
             for n_examples in num_examples_l:
@@ -96,5 +98,5 @@ if __name__ == '__main__':
                     for should_data_balance in no_data_balance_l:
                         args_parser = get_parser()
                         generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i,
-                                              should_data_balance, dvc)
+                                              should_data_balance, dvc, data_split)
     print("Finished running generate and evaluate with all model configurations")

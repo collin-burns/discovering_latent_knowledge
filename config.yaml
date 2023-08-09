@@ -3,9 +3,11 @@ datasets:
     dataset_dir: toxic_dataset_jigsaw
     template_file_path: templates/jigsaw-toxicity-pred-templates.yaml
     prompt_indices: []
+    data_split: "train"
   - dataset_name: jigsaw_unintended_bias
     dataset_dir: jigsaw_unintended_bias
     prompt_indices: [1, 5, 6, 8, 9]
+    data_split: "test"
 
 models:
   - deberta-mnli
