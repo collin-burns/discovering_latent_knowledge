@@ -12,15 +12,16 @@ BATCH_SIZE = 6
 def parse_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file_path", type=str, default="config.yaml", help="Path to YAML config file")
+    parser.add_argument("--device", type=str, default="cpu", help="Device on which to run the script")
     parsed_args = parser.parse_args()
 
     with open(parsed_args.config_file_path, "r") as f:
         config = yaml.safe_load(f)
 
-    return config
+    return config, parsed_args.device
 
 
-def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance):
+def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance, device):
     run_args = run_parser.parse_args()
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
@@ -31,6 +32,7 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, 
     run_args.num_examples = num_examples
     run_args.prompt_idx = prompt_idx
     run_args.no_data_balance = no_data_balance
+    run_args.device = device
     print("-" * 200)
     args_string = f"Model: '{model}'\n" \
                   f"Prompt Number: '{prompt_idx}'\n" \
@@ -76,7 +78,7 @@ def get_prompt_indices(dataset, template_path):
 
 
 if __name__ == '__main__':
-    yaml_config = parse_config()
+    yaml_config, dvc = parse_config()
 
     datasets = yaml_config['datasets']
     models = yaml_config['models']
@@ -93,5 +95,6 @@ if __name__ == '__main__':
                 for i in prompt_indices:
                     for should_data_balance in no_data_balance_l:
                         args_parser = get_parser()
-                        generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i, should_data_balance)
+                        generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i,
+                                              should_data_balance, dvc)
     print("Finished running generate and evaluate with all model configurations")
