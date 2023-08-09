@@ -10,13 +10,20 @@ datasets:
     thresholds: [0.4, 0.5, 0.6]
 
 models:
-  - deberta-mnli
-  - deberta
-  - roberta-mnli
-  - gpt-j
-  - T0pp
-  - unifiedqa
-  - T5
+  - name: deberta-mnli
+    device: cuda
+  - name: deberta
+    device: cuda
+  - name: roberta-mnli
+    device: cuda
+  - name: gpt-j
+    device: cpu
+  - name: T0pp
+    device: cpu
+  - name: unifiedqa
+    device: cpu
+  - name: T5
+    device: cpu
 
 num_training_examples:
   - 1000
