@@ -22,7 +22,8 @@ def parse_config():
     return config, parsed_args.device
 
 
-def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, no_data_balance, device, split):
+def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx,
+                          no_data_balance, device, split, threshold):
     run_args = run_parser.parse_args()
     run_args.model_name = model
     run_args.batch_size = BATCH_SIZE
@@ -35,13 +36,15 @@ def generate_and_evaluate(run_parser, model, dataset, num_examples, prompt_idx, 
     run_args.no_data_balance = no_data_balance
     run_args.device = device
     run_args.split = split
+    run_args.threshold = threshold
     print("-" * 200)
     args_string = f"Model: '{model}'\n" \
                   f"Prompt Number: '{prompt_idx}'\n" \
                   f"Number of Examples: '{num_examples}'\n" \
                   f"Dataset Name: '{dataset_name}'\n" \
                   f"Dataset Directory: '{dataset_dir}'\n" \
-                  f"No Data Balance: '{no_data_balance}'\n"
+                  f"No Data Balance: '{no_data_balance}'\n" \
+                  f"Toxicity Threshold: '{threshold}'"
 
     print(f"Running generate with the following arguments:\n {args_string}")
     generate.main(run_args)
@@ -99,7 +102,9 @@ if __name__ == '__main__':
                 prompt_indices = get_prompt_indices(dataset_obj, template_file_path)
                 for i in prompt_indices:
                     for should_data_balance in no_data_balance_l:
-                        args_parser = get_parser()
-                        generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i,
-                                              should_data_balance, dvc, data_split)
+                        # Iterate over thresholds if we've set them in the config
+                        for toxic_threshold in (dataset_obj.get('thresholds') or []):
+                            args_parser = get_parser()
+                            generate_and_evaluate(args_parser, model_name, dataset_obj, n_examples, i,
+                                                  should_data_balance, dvc, data_split, toxic_threshold)
     print("Finished running generate and evaluate with all model configurations")
